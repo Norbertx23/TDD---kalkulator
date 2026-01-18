@@ -15,8 +15,8 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets)
 # Fetch GoogleTest
 include(FetchContent)
 FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/heads/main.zip
+        googletest
+        URL https://github.com/google/googletest/archive/refs/heads/main.zip
 )
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -27,11 +27,13 @@ include_directories(include)
 
 # Source files (to be added)
 set(SOURCES
-    src/Calculator.cpp
-    include/Calculator.hpp
-    src/MainWindow.cpp
-    include/MainWindow.hpp
-    src/main.cpp
+        src/Calculator.cpp
+        include/Calculator.hpp
+        src/MainWindow.cpp
+        include/MainWindow.hpp
+        src/BitwiseDisplay.cpp
+        include/BitwiseDisplay.hpp
+        src/main.cpp
 )
 
 # Executable
@@ -42,11 +44,11 @@ target_link_libraries(CalculatorApp PRIVATE Qt6::Widgets)
 enable_testing()
 
 add_executable(calculator_tests
-    tests/TestCalculator.cpp
-    src/Calculator.cpp
+        tests/TestCalculator.cpp
+        src/Calculator.cpp
 )
-target_link_libraries(calculator_tests 
-    GTest::gtest_main
+target_link_libraries(calculator_tests
+        GTest::gtest_main
 )
 
 include(GoogleTest)
