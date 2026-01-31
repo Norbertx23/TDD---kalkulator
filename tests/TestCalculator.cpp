@@ -90,3 +90,52 @@ TEST(CalculatorTest, Percentage) {
   Calculator calc;
   EXPECT_DOUBLE_EQ(calc.percentage(50.0), 0.5);
 }
+
+TEST(CalculatorTest, RotateLeft) {
+  Calculator calc;
+  EXPECT_EQ(calc.rotateLeft(1, 1, 4), 2);
+  EXPECT_EQ(calc.rotateLeft(8, 1, 4), 1);
+  EXPECT_EQ(calc.rotateLeft(0xF, 4, 4), 0xF);
+}
+
+TEST(CalculatorTest, RotateRight) {
+  Calculator calc;
+  EXPECT_EQ(calc.rotateRight(2, 1, 4), 1);
+  EXPECT_EQ(calc.rotateRight(1, 1, 4), 8);
+  EXPECT_EQ(calc.rotateRight(0xF, 4, 4), 0xF);
+}
+
+TEST(CalculatorTest, RotateEdgeCases) {
+  Calculator calc;
+
+  EXPECT_EQ(calc.rotateLeft(123, 1, 0), 123);
+  EXPECT_EQ(calc.rotateRight(456, 2, -1), 456);
+
+  EXPECT_EQ(calc.rotateLeft(0xAB, 0, 8), 0xAB);
+  EXPECT_EQ(calc.rotateRight(0xCD, 0, 8), 0xCD);
+
+  EXPECT_EQ(calc.rotateLeft(1, 5, 4), 2);
+
+  EXPECT_EQ(calc.rotateLeft(2, -1, 4), 1);
+
+  EXPECT_EQ(calc.rotateRight(1, -1, 4), 2);
+}
+TEST(CalculatorTest, RotatesLeft) {
+  Calculator calc;
+  EXPECT_EQ(calc.rotateLeft(128, 1, 8), 1);
+}
+
+TEST(CalculatorTest, RotatesRight) {
+  Calculator calc;
+  EXPECT_EQ(calc.rotateRight(1, 1, 8), 128);
+}
+
+TEST(CalculatorTest, SquareRootZero) {
+  Calculator calc;
+  EXPECT_DOUBLE_EQ(calc.squareRoot(0.0), 0.0);
+}
+
+TEST(CalculatorTest, LargeShift) {
+  Calculator calc;
+  EXPECT_EQ(calc.rotateLeft(1, 10, 8), 4);
+}

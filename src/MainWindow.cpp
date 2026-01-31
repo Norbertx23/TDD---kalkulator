@@ -124,14 +124,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
   compactHeader->setVisible(false);
 
-
   mainLayout->insertWidget(3, compactHeader);
   programmerButtons.append(compactHeader);
 
   QGridLayout *gridLayout = new QGridLayout();
   gridLayout->setSpacing(8);
   mainLayout->addLayout(gridLayout);
-
 
   QPushButton *btnLsh = createButton("Lsh", &MainWindow::onOperatorClicked);
   gridLayout->addWidget(btnLsh, 0, 0);
@@ -153,7 +151,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   QPushButton *btnClearEverything =
       createButton("CE", &MainWindow::onClearClicked);
   gridLayout->addWidget(btnClearEverything, 0, 4);
-
 
   btnPerc = createButton("%", &MainWindow::onOperatorClicked);
   gridLayout->addWidget(btnPerc, 0, 6);
@@ -409,7 +406,9 @@ void MainWindow::toggleProgrammerMode(bool enable) {
                            "#e0f7fa; color: black; min-height: 40px;");
   }
 
-  QTimer::singleShot(0, this, [this, enable]() {
+  QTimer *timer = new QTimer(this);
+  timer->setSingleShot(true);
+  connect(timer, &QTimer::timeout, this, [this, enable, timer]() {
     if (enable) {
       this->setMinimumSize(400, 300);
       this->adjustSize();
@@ -417,7 +416,9 @@ void MainWindow::toggleProgrammerMode(bool enable) {
       setMinimumSize(200, 250);
       this->resize(300, 400);
     }
+    timer->deleteLater();
   });
+  timer->start(0);
   updateDigitAvailability();
 }
 
@@ -500,6 +501,58 @@ void MainWindow::onOperatorClicked() {
     return;
 
   QString op = btn->text();
+
+  if (op == "NOT") {
+    bool ok = false;
+    long long val = 0;
+    QString txt = display->text();
+
+    if (isProMode) {
+      switch (currentRadix) {
+      case HEX:
+        val = txt.toLongLong(&ok, 16);
+        break;
+      case DEC:
+        val = txt.toLongLong(&ok, 10);
+        break;
+      case OCT:
+        val = txt.toLongLong(&ok, 8);
+        break;
+      case BIN:
+        val = txt.toLongLong(&ok, 2);
+        break;
+      }
+    } else {
+      // Standard mode fallback
+      val = (long long)txt.toDouble(&ok);
+    }
+
+    if (ok) {
+      val = calculator.Not(val);
+      // Apply mask
+      switch (currentSize) {
+      case QWORD:
+        val &= 0xFFFFFFFFFFFFFFFF;
+        break;
+      case DWORD:
+        val &= 0xFFFFFFFF;
+        break;
+      case WORD:
+        val &= 0xFFFF;
+        break;
+      case BYTE:
+        val &= 0xFF;
+        break;
+      }
+      currentValInt = val;
+      currentVal = (double)val;
+      if (bitwiseDisplay)
+        bitwiseDisplay->setValue(currentValInt);
+      updateDisplay();
+    }
+    waitingForOperand = true;
+    return;
+  }
 
   if (op == "√") {
     isSqrtOperand = true;
@@ -766,8 +819,7 @@ void MainWindow::updateDisplay() {
   bitwiseDisplay->setValue(val);
 }
 
-void MainWindow::onModeChanged() {
-}
+void MainWindow::onModeChanged() {}
 
 void MainWindow::updateDigitAvailability() {
   if (!isProMode) {
