@@ -18,6 +18,23 @@ class MainWindow : public QMainWindow {
 public:
   MainWindow(QWidget *parent = nullptr);
 
+  // Gettery dla testów
+  QLineEdit *getDisplay() { return display; }
+  BitwiseDisplay *getBitwiseDisplay() { return bitwiseDisplay; }
+
+  // Enums publiczne dla testów
+  enum Radix { HEX, DEC, OCT, BIN };
+  enum DataSize { QWORD, DWORD, WORD, BYTE };
+
+  // Settery dla testów
+  void setCurrentValInt(long long val) { currentValInt = val; }
+  long long getCurrentValInt() { return currentValInt; }
+  void setCurrentRadix(Radix r) { currentRadix = r; }
+  void setCurrentSize(DataSize s) { currentSize = s; }
+  unsigned long long getCurrentMask() { return currentMask; }
+  void updateDisplay();
+  void applyMask();
+
 private slots:
   void onDigitClicked();
   void onOperatorClicked();
@@ -58,11 +75,9 @@ private:
 
   void updateDigitAvailability();
 
-  enum Radix { HEX, DEC, OCT, BIN };
   Radix currentRadix = DEC;
   QButtonGroup *radixGroup;
 
-  enum DataSize { QWORD, DWORD, WORD, BYTE };
   DataSize currentSize = QWORD;
   QButtonGroup *sizeGroup;
   unsigned long long currentMask = 0xFFFFFFFFFFFFFFFF;
@@ -71,8 +86,6 @@ private:
   QPushButton *createButton(const QString &text, void (MainWindow::*slot)());
 
   void onSizeChanged(int id);
-  void updateDisplay();
-  void applyMask();
 
   struct CalculationState {
     double value;

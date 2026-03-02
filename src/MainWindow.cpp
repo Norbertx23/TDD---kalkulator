@@ -488,9 +488,17 @@ void MainWindow::onDigitClicked() {
       newVal = txt.toLongLong(&ok, 2);
       break;
     }
-    if (ok) {
+    // Walidacja: sprawdzenie czy liczba mieści się w bieżącej masce
+    if (ok && (newVal & ~currentMask) == 0) {
       currentValInt = newVal;
       bitwiseDisplay->setValue(currentValInt);
+    } else if (!ok || (newVal & ~currentMask) != 0) {
+      // Przepełnienie - przywróć poprzednią wartość i pokaż błąd
+      QMessageBox::warning(this, "Overflow",
+        "Liczba przekracza dozwolony zakres dla bieżącego rozmiaru!");
+      display->setText(QString::number(currentValInt,
+        currentRadix == HEX ? 16 : currentRadix == OCT ? 8 : currentRadix == BIN ? 2 : 10));
+      if (currentRadix == HEX) display->setText(display->text().toUpper());
     }
   }
 }
@@ -736,6 +744,39 @@ void MainWindow::onClearInputClicked() {
 
 void MainWindow::onRadixChanged(int id) {
   currentRadix = static_cast<Radix>(id);
+
+  // Walidacja przed zmianą bazy - sprawdzenie czy bieżąca wartość mieści się w nowej bazie
+  bool ok;
+  long long val = 0;
+  QString txt = display->text();
+
+  // Odczytaj wartość w starej bazie (przed zmianą)
+  Radix oldRadix = static_cast<Radix>(radixGroup->checkedId());
+  switch (oldRadix) {
+  case HEX:
+    val = txt.toLongLong(&ok, 16);
+    break;
+  case DEC:
+    val = txt.toLongLong(&ok, 10);
+    break;
+  case OCT:
+    val = txt.toLongLong(&ok, 8);
+    break;
+  case BIN:
+    val = txt.toLongLong(&ok, 2);
+    break;
+  }
+
+  // Sprawdzenie czy liczba mieści się w bieżącej masce
+  if (ok && (val & ~currentMask) == 0) {
+    currentValInt = val;
+  } else if (!ok || (val & ~currentMask) != 0) {
+    QMessageBox::warning(this, "Conversion Error",
+      "Nie można przekonwertować liczby w wybranej bazie!\nLiczba przekracza zakres.");
+    currentValInt = 0;
+    display->setText("0");
+  }
+
   updateDigitAvailability();
   updateDisplay();
 }
@@ -798,6 +839,12 @@ void MainWindow::updateDisplay() {
     text = QString::number(val, 2);
     break;
   }
+
+  // Zabezpieczenie przed pustym wyświetlaczem
+  if (text.isEmpty()) {
+    text = "0";
+  }
+
   display->setText(text);
 
   int bitCount = 64;

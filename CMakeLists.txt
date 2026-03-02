@@ -51,5 +51,21 @@ target_link_libraries(calculator_tests
         GTest::gtest_main
 )
 
+add_executable(overflow_tests
+        tests/TestOverflow.cpp
+        src/Calculator.cpp
+        src/MainWindow.cpp
+        include/MainWindow.hpp
+        src/BitwiseDisplay.cpp
+        include/BitwiseDisplay.hpp
+)
+target_link_libraries(overflow_tests
+        GTest::gtest_main
+        Qt6::Widgets
+)
+
 include(GoogleTest)
 gtest_discover_tests(calculator_tests)
+gtest_discover_tests(overflow_tests)
+
+
